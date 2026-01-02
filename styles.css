@@ -629,7 +629,7 @@ body {
         background: white;
         width: 100%;
         text-align: center;
-        transition: 0.3s;
+        transition: var(--transition);
         box-shadow: var(--shadow);
         padding: 2rem 0;
     }

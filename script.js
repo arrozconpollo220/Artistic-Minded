@@ -58,6 +58,9 @@ const navLinksArray = Array.from(navLinks);
 const heroContent = document.querySelector('.hero-content');
 const circles = document.querySelectorAll('.circle');
 
+// Back to top button reference (will be set when button is created)
+let backToTopButton = null;
+
 // Consolidated scroll handler for better performance
 let ticking = false;
 window.addEventListener('scroll', () => {
@@ -100,6 +103,17 @@ window.addEventListener('scroll', () => {
                 const speed = (index + 1) * 0.3;
                 circle.style.transform = `translate(${currentScroll * speed * 0.1}px, ${currentScroll * speed * 0.05}px)`;
             });
+            
+            // Back to top button visibility
+            if (backToTopButton) {
+                if (currentScroll > 300) {
+                    backToTopButton.style.opacity = '1';
+                    backToTopButton.style.visibility = 'visible';
+                } else {
+                    backToTopButton.style.opacity = '0';
+                    backToTopButton.style.visibility = 'hidden';
+                }
+            }
             
             lastScroll = currentScroll;
             ticking = false;
@@ -309,15 +323,8 @@ const createBackToTopButton = () => {
     
     document.body.appendChild(button);
     
-    window.addEventListener('scroll', () => {
-        if (window.pageYOffset > 300) {
-            button.style.opacity = '1';
-            button.style.visibility = 'visible';
-        } else {
-            button.style.opacity = '0';
-            button.style.visibility = 'hidden';
-        }
-    });
+    // Store reference for consolidated scroll handler
+    backToTopButton = button;
     
     button.addEventListener('click', () => {
         window.scrollTo({
