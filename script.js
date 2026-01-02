@@ -1,0 +1,336 @@
+// ===================================
+// Mobile Navigation Toggle
+// ===================================
+const hamburger = document.querySelector('.hamburger');
+const navMenu = document.querySelector('.nav-menu');
+const navLinks = document.querySelectorAll('.nav-link');
+
+if (hamburger && navMenu) {
+    hamburger.addEventListener('click', () => {
+        navMenu.classList.toggle('active');
+        
+        // Animate hamburger
+        hamburger.classList.toggle('active');
+    });
+}
+
+// Close mobile menu when clicking on a link
+if (navLinks.length > 0) {
+    navLinks.forEach(link => {
+        link.addEventListener('click', () => {
+            if (navMenu) navMenu.classList.remove('active');
+            if (hamburger) hamburger.classList.remove('active');
+        });
+    });
+}
+
+// ===================================
+// Smooth Scrolling
+// ===================================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        if (target) {
+            target.scrollIntoView({
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+    });
+});
+
+// ===================================
+// Navbar Scroll Effect
+// ===================================
+let lastScroll = 0;
+const navbar = document.querySelector('.navbar');
+
+// ===================================
+// Active Navigation Link
+// ===================================
+const sections = document.querySelectorAll('section');
+const navLinksArray = Array.from(navLinks);
+
+// ===================================
+// Parallax Effect for Hero Section
+// ===================================
+const heroContent = document.querySelector('.hero-content');
+const circles = document.querySelectorAll('.circle');
+
+// Back to top button reference (will be set when button is created)
+let backToTopButton = null;
+
+// Consolidated scroll handler for better performance
+let ticking = false;
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            const currentScroll = window.pageYOffset;
+            
+            // Navbar scroll effect
+            if (navbar) {
+                if (currentScroll > 100) {
+                    navbar.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                } else {
+                    navbar.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                }
+            }
+            
+            // Active navigation link
+            let current = '';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (currentScroll >= sectionTop - 100) {
+                    current = section.getAttribute('id');
+                }
+            });
+            
+            navLinksArray.forEach(link => {
+                link.classList.remove('active');
+                if (link.getAttribute('href') === `#${current}`) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Parallax effect
+            if (heroContent) {
+                heroContent.style.transform = `translateY(${currentScroll * 0.5}px)`;
+                heroContent.style.opacity = 1 - (currentScroll / 700);
+            }
+            
+            circles.forEach((circle, index) => {
+                const speed = (index + 1) * 0.3;
+                circle.style.transform = `translate(${currentScroll * speed * 0.1}px, ${currentScroll * speed * 0.05}px)`;
+            });
+            
+            // Back to top button visibility
+            if (backToTopButton) {
+                if (currentScroll > 300) {
+                    backToTopButton.style.opacity = '1';
+                    backToTopButton.style.visibility = 'visible';
+                } else {
+                    backToTopButton.style.opacity = '0';
+                    backToTopButton.style.visibility = 'hidden';
+                }
+            }
+            
+            lastScroll = currentScroll;
+            ticking = false;
+        });
+        
+        ticking = true;
+    }
+});
+
+// ===================================
+// Intersection Observer for Animations
+// ===================================
+const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -100px 0px'
+};
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.style.opacity = '1';
+            entry.target.style.transform = 'translateY(0)';
+        }
+    });
+}, observerOptions);
+
+// Observe elements for animation
+const animateElements = document.querySelectorAll('.portfolio-item, .contact-item, .skill-item');
+animateElements.forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+    observer.observe(el);
+});
+
+// ===================================
+// Skill Bar Animation
+// ===================================
+const skillObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const progressBar = entry.target.querySelector('.skill-progress');
+            if (progressBar) {
+                // Get the original width percentage from inline style or computed style
+                const originalWidth = progressBar.style.width || window.getComputedStyle(progressBar).width;
+                progressBar.style.width = '0%';
+                setTimeout(() => {
+                    progressBar.style.width = originalWidth;
+                }, 200);
+            }
+            skillObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.5 });
+
+const skillItems = document.querySelectorAll('.skill-item');
+if (skillItems.length > 0) {
+    skillItems.forEach(skill => {
+        skillObserver.observe(skill);
+    });
+}
+
+// ===================================
+// Toast Notification System
+// ===================================
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        background: ${type === 'success' ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+        max-width: 300px;
+        word-wrap: break-word;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// ===================================
+// Contact Form Handling
+// ===================================
+const contactForm = document.getElementById('contactForm');
+
+if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const name = document.getElementById('name').value;
+        const email = document.getElementById('email').value;
+        const message = document.getElementById('message').value;
+        
+        // In a real application, you would send this data to a server
+        console.log('Form submitted:', { name, email, message });
+        
+        // Show success toast
+        showToast('Thank you for your message! I will get back to you soon.');
+        
+        // Reset form
+        contactForm.reset();
+    });
+}
+
+// ===================================
+// Portfolio Item Hover Effect
+// ===================================
+const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+portfolioItems.forEach(item => {
+    item.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-10px) scale(1.02)';
+    });
+    
+    item.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+    });
+});
+
+// ===================================
+// Typing Effect for Hero Title (Optional Enhancement)
+// ===================================
+function typeWriter(element, text, speed = 100) {
+    let i = 0;
+    element.textContent = '';
+    
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    
+    type();
+}
+
+// ===================================
+// Initialize on Load
+// ===================================
+window.addEventListener('load', () => {
+    // Add loaded class to body for any CSS transitions
+    document.body.classList.add('loaded');
+    
+    // Set current year in footer
+    const yearElement = document.getElementById('currentYear');
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+    }
+    
+    // Optional: Add any initialization code here
+    console.log('Artistic Minded website loaded successfully!');
+});
+
+// ===================================
+// Back to Top Button (Optional Enhancement)
+// ===================================
+const createBackToTopButton = () => {
+    const button = document.createElement('button');
+    button.innerHTML = '↑';
+    button.className = 'back-to-top';
+    button.style.cssText = `
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        font-size: 24px;
+        cursor: pointer;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 999;
+    `;
+    
+    document.body.appendChild(button);
+    
+    // Store reference for consolidated scroll handler
+    backToTopButton = button;
+    
+    button.addEventListener('click', () => {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    button.addEventListener('mouseenter', () => {
+        button.style.transform = 'scale(1.1) translateY(-5px)';
+    });
+    
+    button.addEventListener('mouseleave', () => {
+        button.style.transform = 'scale(1) translateY(0)';
+    });
+};
+
+// Initialize back to top button
+createBackToTopButton();
