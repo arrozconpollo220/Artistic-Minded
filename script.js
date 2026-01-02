@@ -205,7 +205,7 @@ function showToast(message, type = 'success') {
         toast.style.animation = 'fadeOut 0.3s ease';
         setTimeout(() => {
             if (toast.parentNode) {
-                toast.parentNode.removeChild(toast);
+                toast.remove();
             }
         }, 300);
     }, 3000);
@@ -283,16 +283,6 @@ window.addEventListener('load', () => {
     
     // Optional: Add any initialization code here
     console.log('Artistic Minded website loaded successfully!');
-});
-
-// ===================================
-// Prevent Context Menu on Images (Optional)
-// ===================================
-document.querySelectorAll('img, svg').forEach(element => {
-    element.addEventListener('contextmenu', (e) => {
-        // Uncomment the line below if you want to disable right-click on images
-        // e.preventDefault();
-    });
 });
 
 // ===================================
