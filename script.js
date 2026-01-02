@@ -143,10 +143,11 @@ const skillObserver = new IntersectionObserver((entries) => {
         if (entry.isIntersecting) {
             const progressBar = entry.target.querySelector('.skill-progress');
             if (progressBar) {
-                const width = window.getComputedStyle(progressBar).width;
+                // Get the original width percentage from inline style or computed style
+                const originalWidth = progressBar.style.width || window.getComputedStyle(progressBar).width;
                 progressBar.style.width = '0%';
                 setTimeout(() => {
-                    progressBar.style.width = width;
+                    progressBar.style.width = originalWidth;
                 }, 200);
             }
             skillObserver.unobserve(entry.target);
@@ -159,6 +160,41 @@ if (skillItems.length > 0) {
     skillItems.forEach(skill => {
         skillObserver.observe(skill);
     });
+}
+
+// ===================================
+// Toast Notification System
+// ===================================
+function showToast(message, type = 'success') {
+    const toast = document.createElement('div');
+    toast.className = `toast toast-${type}`;
+    toast.textContent = message;
+    toast.style.cssText = `
+        position: fixed;
+        top: 100px;
+        right: 30px;
+        background: ${type === 'success' ? 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)' : 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'};
+        color: white;
+        padding: 1rem 1.5rem;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        z-index: 10000;
+        font-weight: 500;
+        animation: slideInRight 0.3s ease, fadeOut 0.3s ease 2.7s;
+        max-width: 300px;
+        word-wrap: break-word;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.parentNode.removeChild(toast);
+            }
+        }, 300);
+    }, 3000);
 }
 
 // ===================================
@@ -177,8 +213,8 @@ if (contactForm) {
         // In a real application, you would send this data to a server
         console.log('Form submitted:', { name, email, message });
         
-        // Show success message
-        alert('Thank you for your message! I will get back to you soon.');
+        // Show success toast
+        showToast('Thank you for your message! I will get back to you soon.');
         
         // Reset form
         contactForm.reset();
@@ -224,6 +260,12 @@ function typeWriter(element, text, speed = 100) {
 window.addEventListener('load', () => {
     // Add loaded class to body for any CSS transitions
     document.body.classList.add('loaded');
+    
+    // Set current year in footer
+    const yearElement = document.getElementById('currentYear');
+    if (yearElement) {
+        yearElement.textContent = new Date().getFullYear();
+    }
     
     // Optional: Add any initialization code here
     console.log('Artistic Minded website loaded successfully!');
